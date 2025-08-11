@@ -1,0 +1,81 @@
+import { Runtime } from '@mirawision/chrome-api/runtime';
+
+import { BasePulse } from './base-pulse';
+import { Message, Payload } from './types';
+
+/**
+ * Manages local state and communication within a specific extension context.
+ * Provides isolated state management and messaging capabilities for individual contexts.
+ * @extends BasePulse
+ */
+class LocalPulse extends BasePulse {
+  /**
+   * Creates a new LocalPulse instance and initializes message handling.
+   * @param eventCategory - Unique identifier for routing messages
+   * @param events - Map of event handlers with access to sender and response capabilities
+   */
+  public constructor(
+    eventCategory: string,
+    events: Record<string, (payload: Payload, sender: chrome.runtime.MessageSender, sendResponse: (res: any) => void) => any> = {}
+  ) {
+    super(eventCategory, {} as any);
+
+    this.setEvents(events as any);
+    this.startListening();
+  }
+
+  /**
+   * Sends a message within the current extension context.
+   * @template T - Expected response type
+   * @param action - The action identifier for the message
+   * @param payload - Optional data to be sent with the message
+   * @returns Promise resolving to the response
+   */
+  public async sendMessage<T extends {}>(action: string, payload: Payload = {}): Promise<T> {
+    const message: Message = {
+      category: this.eventCategory,
+      action,
+      payload,
+    };
+    return Runtime.sendMessage<T>(message);
+  }
+
+  /**
+   * Starts listening for messages within the current context.
+   * Sets up message handling and response processing.
+   * Supports synchronous, asynchronous, and promise-based responses.
+   */
+  public startListening(): void {
+    Runtime.addMessageListener((message: Message, sender, sendResponse) => {
+
+      if (message.category !== this.eventCategory) {
+        return false;
+      }
+
+      const handler = (this as any).eventActions[message.action];
+      if (!handler) {
+        return false;
+      }
+
+      const result = handler(message.payload, sender, sendResponse);
+
+      if (result === true) {
+        return true;
+      }
+
+      if (result instanceof Promise) {
+        result.then(res => {
+          if (res !== undefined) sendResponse(res);
+        });
+        return true;
+      }
+
+      if (result !== undefined) {
+        sendResponse(result);
+      }
+      return false;
+    });
+  }
+}
+
+export { LocalPulse };

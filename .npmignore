@@ -1,0 +1,7 @@
+node_modules
+tests
+docs
+mirawision-chrome-pulse-*.tgz
+src
+jest.config.js
+tsconfig.json

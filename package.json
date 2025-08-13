@@ -73,7 +73,7 @@
   "homepage": "https://github.com/MiraWision/chrome-pulse",
   "license": "MIT",
   "dependencies": {
-    "@mirawision/chrome-api": "1.0.0"
+    "@mirawision/chrome-api": "1.0.1"
   },
   "devDependencies": {
     "@types/chrome": "0.1.3",

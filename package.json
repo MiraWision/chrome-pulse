@@ -1,6 +1,6 @@
 {
   "name": "@mirawision/chrome-pulse",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A powerful state management library for Chrome extensions, providing seamless communication between different extension contexts and components.",
   "main": "index.js",
   "types": "index.d.ts",
